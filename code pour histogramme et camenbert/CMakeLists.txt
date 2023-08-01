@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 project(verifier_segmentation_pour_string_legend LANGUAGES C)
+set(CMAKE_PREFIX_PATH "/usr/lib/" ${CMAKE_PREFIX_PATH})
 find_package(gd)
 add_executable(pie_chart_verif main.c)
 target_link_libraries(pie_chart_verif gd)
