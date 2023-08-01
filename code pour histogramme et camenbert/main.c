@@ -216,5 +216,6 @@ if (type_graph !='h'){
 create_camenbert(name_file,titre,nbr_etiquettes,Tab_etiq,Tab_pourcentage,arr_plan_couleur);}
 else{create_histogramme(name_file,titre,nbr_etiquettes,Tab_etiq,Tab_pourcentage,arr_plan_couleur);}
 
+printf("L'image de votre graphique a été créée.\n");
     return 0;
 }
