@@ -2,52 +2,98 @@
 #include <string.h>
 #include "gd.h"
 #include <stdlib.h>
-#include <time.h>
 #include <gdfontg.h>
 
+///
+/// \brief ask_graphic_type: permet de selectionner le type de graphique entre histogramme et camenbert
+/// \return
+///
 char ask_graphic_type(){
     char graph_T;
     printf("Veuillez indiquer le type de graphique (h pour histogramme, c pour camenbert) :\n");
     scanf(" %c", &graph_T);
     return graph_T;
 }
-
+///
+/// \brief ask_titre : permet de rentrer le titre du graphique, les espaces sont autorisés,
+/// si non remplie un titre par défaut est présent et défini dans la fonction main
+/// \param title : le titre par defaut
+///
 void ask_titre(char title[]){
     printf("Quel nom voulez-vous donner au titre du graphique:\n");
     scanf(" %[^\n]", title);
 }
+///
+/// \brief ask_nbr_etiquette: permet de savoir sur combien d'éléments porte le graphique pour demander ensuite de les nommer.
+/// Permet aussi de dimensionner les graphiques à une taille raisonnable
+/// \return
+///
+
 int ask_nbr_etiquette(){
 printf("Veuillez rentrer le nombre d'élément à représenter:\n");
 int nbr_etiquet=0;
 scanf("%d",&nbr_etiquet);
 return nbr_etiquet;
 }
-
+///
+/// \brief ask_name_etiquette: Permet de remplir un tableau de 100 éléments maximun
+/// avec le nom des éléments à représenter sur le graphique
+/// \param nbr_etiquettes
+/// \param Tab_etiquettes
+///
 void ask_name_etiquette(int nbr_etiquettes,char Tab_etiquettes[nbr_etiquettes][100]){
 int i =0;
 while( i < nbr_etiquettes){
     printf ("Veuillez indiquer le nom de l'élément %d\n",i+1);
     scanf("%99s",Tab_etiquettes[i]);i++;}
 }
-
+///
+/// \brief ask_percentage: permet d'attribuer une valeur aux élements pour savoir les proportions à représenter
+/// \param nbr_etiquettes
+/// \param Tab_etiquettes
+/// \param Tab_pourcent
+///
 void ask_percentage(int nbr_etiquettes,char Tab_etiquettes[nbr_etiquettes][100], float Tab_pourcent[nbr_etiquettes]){
 int i=0;
 while( i < nbr_etiquettes){
     printf ("Veuillez indiquer le pourcentage pour %s\n",Tab_etiquettes[i]);
     scanf("%f",&Tab_pourcent[i]);i++;}
 }
+
+///
+/// \brief ask_name : permet d'attribuer un nom au fichier qui va etre créer
+/// \param file_name
+///
 void ask_name(char file_name[]){
-    printf("quel nom voulez-vous donner à l'image de sortie:\n");
+    printf("Quel nom voulez-vous donner à l'image de sortie:\n");
     scanf(" %[^\n]", file_name);
 }
-
+///
+/// \brief get_couleur_background: permet de sélectionner
+///  une des deux valeur possibles en couleur d'arrière plan
+/// \return
+///
 char get_couleur_background() {
     char backg;
     printf("Veuillez indiquer la couleur d'arrière-plan (b pour blanc, n pour noir) :\n");
     scanf(" %c", &backg);
     return backg;
 }
-
+///
+/// \brief create_camenbert : permet de créer un diagramme en camenbert
+/// on créer d'abord l'image et le nom sous lequelle elle sera sauvegardée;
+/// on lui applique ensuite la couleur d'arrière plan;
+/// ensuite on inscrit le titre sur l'image de la couleur opposée  à celle du background;
+/// ensuite on dessine les différentes parties du camenbert et son étiquette et pourcentage sont inscrit dans la légendes,
+///  leur couleur d'affichage est déterminé par leur index dans le tableau;
+/// à la fin on ouvre le fichier, on insére l'image dedans, on ferme le fichier qui a été sauvegardé et on efface l'image de la mémoire
+/// \param file_name
+/// \param title
+/// \param nbr_etiquettes
+/// \param Tab_etiquettes
+/// \param Tab_pourcent
+/// \param backg
+///
 void create_camenbert(char *file_name,
                       char *title,
                       int nbr_etiquettes,
@@ -110,7 +156,16 @@ void create_camenbert(char *file_name,
     fclose(output);
     gdImageDestroy(im);
 }
-
+///
+/// \brief create_histogramme: la logique est la meme que le camenbert
+/// sauf que les rectangles crées ont leur hauteur proportionnelle aux valeurs des pourcentages
+/// \param file_name
+/// \param title
+/// \param nbr_etiquettes
+/// \param Tab_etiquettes
+/// \param Tab_pourcent
+/// \param backg
+///
 
 void create_histogramme(char *file_name,
                       char *title,
@@ -177,11 +232,15 @@ void create_histogramme(char *file_name,
     fclose(output);
     gdImageDestroy(im);
 }
-
+///
+/// \brief main: Met toutes les fonctions définies précèdemment en relation
+///  et définit des valeurs par défaut pour certaines varibles
+/// \return
+///
 
 int main()
 
-{srand(time(NULL));
+{
  char titre[30] ="Titre";
  int nbr_etiquettes=0;
  printf("Bienvenue dans l\'outil de creation de camenbert\n");
