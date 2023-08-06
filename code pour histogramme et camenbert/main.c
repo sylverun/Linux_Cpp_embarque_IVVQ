@@ -3,6 +3,8 @@
 #include "gd.h"
 #include <stdlib.h>
 #include <gdfontg.h>
+#include <gdfonts.h>
+
 
 ///
 /// \brief ask_graphic_type: permet de selectionner le type de graphique entre histogramme et camenbert
@@ -133,7 +135,7 @@ void create_camenbert(char *file_name,
     int num_colors = sizeof(colors) / sizeof(colors[0]);
     int black = gdImageColorAllocate(im, 0, 0, 0);
 
-    gdFontPtr font = gdFontGetGiant();
+    gdFontPtr font = gdFontGetSmall();
     int legend_x = cx + radius;
     int legend_y = 80;
 
