@@ -18,6 +18,8 @@ public:
 private slots:
     void open_file();
     void closeTab(int index);
+    void save_file();
+    void asterisk(int index);
 private:
     Ui::MainWindow *ui;
 };
