@@ -19,7 +19,8 @@ private slots:
     void open_file();
     void closeTab(int index);
     void save_file();
-    void asterisk(int index);
+    void asterisk();
+    void updateCursorPosition();
 private:
     Ui::MainWindow *ui;
 };

@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
     //Action sur closable tab
     connect(ui->tabWidget, &QTabWidget::tabCloseRequested, this, &MainWindow::closeTab);
 
-    connect(ui->tabWidget->currentWidget(), SIGNAL(textChanged()),this,SLOT(asterisk()));
+
 }
 
 MainWindow::~MainWindow()
@@ -61,13 +61,26 @@ void MainWindow::open_file(){
     if (!filePath.isEmpty()) {
         QFile file(filePath);
         if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-           QTextStream in(&file);
+            QTextStream in(&file);
 
-          //ouvrir nouvel onglet avec le fichier voulu
-           QTextEdit *textEdit = new QTextEdit(ui->tabWidget);
-           textEdit->setPlainText(in.readAll());
-           ui->tabWidget->addTab(textEdit, QFileInfo(filePath).fileName());
-           file.close();
+            // Ouvrir nouvel onglet avec le fichier voulu
+            QTextEdit *textEdit = new QTextEdit(ui->tabWidget);
+            textEdit->setPlainText(in.readAll());
+
+            // connecter le curseur au slot updatecursorposition
+            connect(textEdit, &QTextEdit::cursorPositionChanged, this, &MainWindow::updateCursorPosition);
+
+
+            // Ajoutez l'onglet avec le texte du fichier
+            int tabIndex = ui->tabWidget->addTab(textEdit, QFileInfo(filePath).fileName());
+
+            // Initialisez la propriété "TabIndex" avec l'index de l'onglet
+            textEdit->setProperty("TabIndex", tabIndex);
+
+            file.close();
+
+            // Connectez le signal textChanged au slot asterisk
+            connect(textEdit, &QTextEdit::textChanged, this, &MainWindow::asterisk);
         }
     }
 }
@@ -88,9 +101,28 @@ QString filePath = QFileDialog::getSaveFileName(this, "Enregistrer sous", QStrin
 }
 }
 
-void MainWindow::asterisk(int index){
-    QString tabText = ui->tabWidget->tabText(index);
-    if (!tabText.endsWith("*")) {
-    ui->tabWidget->setTabText(index,tabText +  "*");
-}
+void MainWindow::asterisk(){
+    QTextEdit *textEdit = qobject_cast<QTextEdit*>(sender()); // Obtenez le QTextEdit émetteur du signal
+        if (textEdit) {
+            int tabIndex = textEdit->property("TabIndex").toInt(); // Obtenez le numéro de l'onglet
+            QString tabText = ui->tabWidget->tabText(tabIndex); // Obtenez le texte actuel de l'onglet
+
+            if (!tabText.endsWith('*')) { // Vérifiez si l'astérisque n'est pas déjà présent
+                tabText += '*'; // Ajoutez un astérisque
+                ui->tabWidget->setTabText(tabIndex, tabText); // Mettez à jour le texte de l'onglet
+            }
+        }
+    }
+
+
+void MainWindow::updateCursorPosition() {
+    QTextEdit *textEdit = qobject_cast<QTextEdit*>(sender());
+    if (textEdit) {
+        QTextCursor cursor = textEdit->textCursor();
+        int line = cursor.blockNumber() + 1; // Les lignes sont généralement numérotées à partir de 1
+        int column = cursor.columnNumber() + 1; // Les colonnes sont généralement numérotées à partir de 1
+
+        // Mettez à jour le texte de la barre d'état
+        statusBar()->showMessage(QString("Ligne : %1, Colonne : %2").arg(line).arg(column));
+    }
 }
