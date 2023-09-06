@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QLineEdit>
 #include <QTextEdit>
+#include <QString>
 
 class Searchbox : public QDialog
 { Q_OBJECT
@@ -14,11 +15,14 @@ public:
 public slots:
     void research();
     void findNext();
+
 public:
     QLineEdit *searchLineEdit;
     QPushButton *searchButton;
     QPushButton *nextButton;
-    QTextEdit* currentTextEdit;
+    QString currentTextEdit;
+    QString FoundText;
+    void text_find();
 };
 
 #endif // SEARCHBOX_H

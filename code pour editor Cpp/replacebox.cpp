@@ -1,4 +1,4 @@
-#include "searchbox.h"
+#include "replacebox.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QVBoxLayout>
@@ -8,41 +8,39 @@
 #include <QDebug>
 #include <QTextCursor>
 
+Replacebox::Replacebox(QTextEdit* currentTextEdit, QWidget *parent) : QDialog(parent)
+{     setWindowTitle("Remplacer ");
+      To_replace = new QLineEdit(this);
+      Replace_by= new QLineEdit(this);
+      Valider = new QPushButton("Remplacer", this);
 
 
-Searchbox::Searchbox(QTextEdit* currentTextEdit, QWidget *parent) : QDialog(parent)
-{
-    setWindowTitle("Rechercher");
-    searchLineEdit = new QLineEdit(this);
-    searchButton = new QPushButton("Rechercher", this);
-    nextButton = new QPushButton("Suivant", this);
+      QVBoxLayout *layout = new QVBoxLayout;
+      layout->addWidget(new QLabel("Remplacer :"));
+      layout->addWidget(To_replace);
+      layout->addWidget(new QLabel("Par : "));
+      layout->addWidget(Replace_by);
+      layout->addWidget(Valider);
 
-    QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(new QLabel("Rechercher un mot :"));
-    layout->addWidget(searchLineEdit);
-    layout->addWidget(searchButton);
-    layout->addWidget(nextButton);
+      this->currentTextEdit = currentTextEdit->toPlainText();
+      connect(Valider, &QPushButton::clicked, this, &Replacebox::Remplacer_);
 
-    this->currentTextEdit = currentTextEdit->toPlainText();
+      setLayout(layout);
 
-    connect(searchButton, &QPushButton::clicked, this, &Searchbox::research);
-    connect(nextButton, &QPushButton::clicked, this, &Searchbox::findNext);
-
-    setLayout(layout);
 }
 
-Searchbox::~Searchbox()
+Replacebox::~Replacebox()
 {
 }
 
-
-void Searchbox::research()
+void Replacebox::Remplacer_()
 {
-    QString searchString = searchLineEdit->text();
+    QString toreplaceString = To_replace->text();
+    QString replaceByString = Replace_by->text();
     QTextEdit *currentTextEdit = new QTextEdit(this->currentTextEdit, nullptr);
 
     // Vérifiez si le texte à rechercher n'est pas vide
-    if (!searchString.isEmpty()) {
+    if (!toreplaceString.isEmpty()) {
         if (currentTextEdit) {
             qDebug() << currentTextEdit->toPlainText();
             QTextCursor cursor = currentTextEdit->textCursor();
@@ -52,11 +50,11 @@ void Searchbox::research()
             while (!cursor.isNull() && !cursor.atEnd()) {
                 cursor.select(QTextCursor::WordUnderCursor);
                 QString g = cursor.selectedText();
-                if (g == searchString) {
+                if (g == toreplaceString) {
                     currentTextEdit->setTextCursor(cursor);
                     qDebug() << g;
-                    FoundText = g;
-                    return; // Arrêtez la recherche lorsque vous avez trouvé une correspondance
+
+                    return;
                 }
                 cursor.movePosition(QTextCursor::NextWord);
             }
@@ -67,8 +65,4 @@ void Searchbox::research()
     }
 
     delete (currentTextEdit);
-}
-void Searchbox::findNext()
-{
-
 }

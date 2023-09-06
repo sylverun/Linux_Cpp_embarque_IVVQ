@@ -1,9 +1,13 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "searchbox.h"
+#include "replacebox.h"
 
 #include <QtWidgets>
 #include <QPushButton>
+#include <QDebug>
+#include <QString>
+
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -23,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
     //Action sur ouvrir et sauver
     connect(ui->action_Ouvrir,SIGNAL(triggered()),this,SLOT(open_file()));
     connect(ui->action_Sauver,SIGNAL(triggered()),this,SLOT(save_file()));
-    connect(ui->action_Rechercher,SIGNAL(triggered()),this,SLOT(research()));
+
 
     //Action sur closable tab
     connect(ui->tabWidget, &QTabWidget::tabCloseRequested, this, &MainWindow::closeTab);
@@ -86,6 +90,7 @@ void MainWindow::open_file(){
             connect(textEdit, &QTextEdit::textChanged, this, &MainWindow::asterisk);
 
             connect(ui->action_Rechercher, &QAction::triggered, this, &MainWindow::openSearch);
+            connect(ui->action_Remplacer, &QAction::triggered, this, &MainWindow::openReplace);
         }
     }
 }
@@ -134,9 +139,19 @@ void MainWindow::updateCursorPosition() {
 
 void MainWindow::openSearch(){
     QTextEdit *currentTextEdit = qobject_cast<QTextEdit*>(ui->tabWidget->currentWidget());
-    if (currentTextEdit) {
-    Searchbox *research_ = new Searchbox(currentTextEdit, this);
-    research_->exec(); // Ouvrir la fenêtre de recherche en mode modal
-    delete research_;  // Libérer la mémoire lorsque la fenêtre de recherche est fermée
+        if (currentTextEdit) {
+            Searchbox *research_ = new Searchbox(currentTextEdit, this);
+            research_->exec(); // Ouvrir la fenêtre de recherche
+            delete(research_);   // Libérer la mémoire lorsque la fenêtre de recherche est fermée
+}
+}
+
+
+void MainWindow::openReplace(){
+    QTextEdit *currentTextEdit = qobject_cast<QTextEdit*>(ui->tabWidget->currentWidget());
+        if (currentTextEdit) {
+            Replacebox *replace_ = new Replacebox(currentTextEdit, this);
+            replace_->exec(); // Ouvrir la fenêtre
+            delete(replace_);   // Libérer la mémoire lorsque la fenêtre est fermée
 }
 }

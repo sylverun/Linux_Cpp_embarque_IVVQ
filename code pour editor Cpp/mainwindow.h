@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QTextCursor>
+#include <QString>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -14,6 +16,8 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    QString textofind;
+
 
 private slots:
     void open_file();
@@ -22,6 +26,8 @@ private slots:
     void asterisk();
     void updateCursorPosition();
     void openSearch();
+    void handletext_find();
+    void openReplace();
 private:
     Ui::MainWindow *ui;
 };
