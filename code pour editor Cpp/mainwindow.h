@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QTextCursor>
 #include <QString>
+#include <QSettings>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -18,7 +19,6 @@ public:
     ~MainWindow();
     QString textofind;
 
-
 private slots:
     void open_file();
     void closeTab(int index);
@@ -26,9 +26,11 @@ private slots:
     void asterisk();
     void updateCursorPosition();
     void openSearch();
-    void handletext_find();
     void openReplace();
+    void openRecentFile();
 private:
     Ui::MainWindow *ui;
+    QSettings settings;
+
 };
 #endif // MAINWINDOW_H

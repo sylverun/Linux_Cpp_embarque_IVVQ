@@ -102,6 +102,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <string>&amp;Remplacer</string>
    </property>
   </action>
+  <action name="action_R_cents">
+   <property name="text">
+    <string>&amp;Récents</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

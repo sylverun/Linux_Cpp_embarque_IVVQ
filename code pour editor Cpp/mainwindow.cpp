@@ -13,10 +13,23 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+
 {
     ui->setupUi(this);
     ui->tabWidget->setTabsClosable(true);
     ui->tabWidget->setTabText(0,"Nouveau document");
+
+    //Créer sous-liste Récent
+
+    // Create the "Recent Files" submenu
+    QMenu *recentFilesMenu = ui->menu_Fichier->addMenu(tr("Recent &Files"));
+
+    // Load and populate recent files from settings
+    QStringList recentFiles = settings.value("recentFiles").toStringList();
+    for (int i = 0; i < recentFiles.count(); ++i) {
+        QAction *recentFileAction = recentFilesMenu->addAction(recentFiles.at(i));
+        connect(recentFileAction, &QAction::triggered, this, &MainWindow::openRecentFile);
+    }
 
     // Associez des raccourcis clavier aux actions (Ctrl+O et Ctrl+S)
     ui->action_Ouvrir->setShortcut(QKeySequence::Open);
@@ -69,6 +82,11 @@ void MainWindow::open_file(){
         QFile file(filePath);
         if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             QTextStream in(&file);
+
+            QStringList recentFiles = settings.value("Récents &Fichier").toStringList();
+            recentFiles.prepend(filePath);
+            recentFiles = recentFiles.mid(0, 10); // Keep only the 10 most recent files
+            settings.setValue("Récents &Fichier", recentFiles);
 
             // Ouvrir nouvel onglet avec le fichier voulu
             QTextEdit *textEdit = new QTextEdit(ui->tabWidget);
@@ -154,4 +172,13 @@ void MainWindow::openReplace(){
             replace_->exec(); // Ouvrir la fenêtre
             delete(replace_);   // Libérer la mémoire lorsque la fenêtre est fermée
 }
+}
+
+
+void MainWindow::openRecentFile() {
+    QAction *action = qobject_cast<QAction *>(sender());
+    if (action) {
+        QString filePath = action->text();
+        //open_file(filePath);
+    }
 }
