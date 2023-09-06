@@ -21,6 +21,7 @@ private slots:
     void save_file();
     void asterisk();
     void updateCursorPosition();
+    void openSearch();
 private:
     Ui::MainWindow *ui;
 };

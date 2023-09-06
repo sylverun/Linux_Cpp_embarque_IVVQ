@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "searchbox.h"
 
 #include <QtWidgets>
 #include <QPushButton>
@@ -16,11 +17,13 @@ MainWindow::MainWindow(QWidget *parent)
     // Associez des raccourcis clavier aux actions (Ctrl+O et Ctrl+S)
     ui->action_Ouvrir->setShortcut(QKeySequence::Open);
     ui->action_Sauver->setShortcut(QKeySequence::Save);
+    ui->action_Rechercher->setShortcut(QKeySequence::Find);
+    ui->action_Remplacer->setShortcut(QKeySequence::Print);
 
     //Action sur ouvrir et sauver
     connect(ui->action_Ouvrir,SIGNAL(triggered()),this,SLOT(open_file()));
     connect(ui->action_Sauver,SIGNAL(triggered()),this,SLOT(save_file()));
-
+    connect(ui->action_Rechercher,SIGNAL(triggered()),this,SLOT(research()));
 
     //Action sur closable tab
     connect(ui->tabWidget, &QTabWidget::tabCloseRequested, this, &MainWindow::closeTab);
@@ -81,6 +84,8 @@ void MainWindow::open_file(){
 
             // Connectez le signal textChanged au slot asterisk
             connect(textEdit, &QTextEdit::textChanged, this, &MainWindow::asterisk);
+
+            connect(ui->action_Rechercher, &QAction::triggered, this, &MainWindow::openSearch);
         }
     }
 }
@@ -125,4 +130,13 @@ void MainWindow::updateCursorPosition() {
         // Mettez à jour le texte de la barre d'état
         statusBar()->showMessage(QString("Ligne : %1, Colonne : %2").arg(line).arg(column));
     }
+}
+
+void MainWindow::openSearch(){
+    QTextEdit *currentTextEdit = qobject_cast<QTextEdit*>(ui->tabWidget->currentWidget());
+    if (currentTextEdit) {
+    Searchbox *research_ = new Searchbox(currentTextEdit, this);
+    research_->exec(); // Ouvrir la fenêtre de recherche en mode modal
+    delete research_;  // Libérer la mémoire lorsque la fenêtre de recherche est fermée
+}
 }
