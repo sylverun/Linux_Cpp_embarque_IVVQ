@@ -3,8 +3,6 @@
 
 #include <QMainWindow>
 #include <QTextCursor>
-#include <QString>
-#include <QSettings>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -17,20 +15,21 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    QString textofind;
 
 private slots:
     void open_file();
-    void closeTab(int index);
     void save_file();
     void asterisk();
     void updateCursorPosition();
+    void closeTab(int index);
     void openSearch();
     void openReplace();
-    void openRecentFile();
+    void hideTab();
+    void search_in_text();
+    void next_in_text();
+    void replace_in_text();
 private:
     Ui::MainWindow *ui;
-    QSettings settings;
-
+    QTextCursor lastFoundCursor;
 };
 #endif // MAINWINDOW_H

@@ -1,51 +1,41 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "searchbox.h"
-#include "replacebox.h"
 
 #include <QtWidgets>
 #include <QPushButton>
 #include <QDebug>
 #include <QString>
 
-
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-
 {
     ui->setupUi(this);
     ui->tabWidget->setTabsClosable(true);
-    ui->tabWidget->setTabText(0,"Nouveau document");
+    ui->tabWidget1->setTabsClosable(true);
+    ui->tabWidget1->hide();
+    ui->tabWidget->hide();
+    ui->tabWidget->removeTab(0);
 
-    //Créer sous-liste Récent
-
-    // Create the "Recent Files" submenu
-    QMenu *recentFilesMenu = ui->menu_Fichier->addMenu(tr("Recent &Files"));
-
-    // Load and populate recent files from settings
-    QStringList recentFiles = settings.value("recentFiles").toStringList();
-    for (int i = 0; i < recentFiles.count(); ++i) {
-        QAction *recentFileAction = recentFilesMenu->addAction(recentFiles.at(i));
-        connect(recentFileAction, &QAction::triggered, this, &MainWindow::openRecentFile);
-    }
-
-    // Associez des raccourcis clavier aux actions (Ctrl+O et Ctrl+S)
+    // Associez des raccourcis clavier aux actions
     ui->action_Ouvrir->setShortcut(QKeySequence::Open);
     ui->action_Sauver->setShortcut(QKeySequence::Save);
-    ui->action_Rechercher->setShortcut(QKeySequence::Find);
+    ui->action_Chercher->setShortcut(QKeySequence::Find);
     ui->action_Remplacer->setShortcut(QKeySequence::Print);
 
     //Action sur ouvrir et sauver
     connect(ui->action_Ouvrir,SIGNAL(triggered()),this,SLOT(open_file()));
     connect(ui->action_Sauver,SIGNAL(triggered()),this,SLOT(save_file()));
 
-
-    //Action sur closable tab
+    //Action sur closable tab (texte)
     connect(ui->tabWidget, &QTabWidget::tabCloseRequested, this, &MainWindow::closeTab);
+    //Action sur closable tab (recherche)
+    connect(ui->tabWidget1, &QTabWidget::tabCloseRequested, this, &MainWindow::hideTab);
 
 
+    connect(ui->pushButton_Rech,SIGNAL(clicked()),this,SLOT(search_in_text()));
+    connect(ui->pushButton_Suiv,SIGNAL(clicked()),this,SLOT(next_in_text()));
+    connect(ui->pushButton_Remplacer,SIGNAL(clicked()),this,SLOT(replace_in_text()));
 }
 
 MainWindow::~MainWindow()
@@ -75,43 +65,33 @@ void MainWindow::closeTab(int index){
     ui->tabWidget->removeTab(index);
 }
 
-
 void MainWindow::open_file(){
     QString filePath = QFileDialog::getOpenFileName(this, "Ouvrir un fichier", QString(),"Fichiers texte (*.txt);;Tous les fichiers (*)");
     if (!filePath.isEmpty()) {
         QFile file(filePath);
         if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             QTextStream in(&file);
-
-            QStringList recentFiles = settings.value("Récents &Fichier").toStringList();
-            recentFiles.prepend(filePath);
-            recentFiles = recentFiles.mid(0, 10); // Keep only the 10 most recent files
-            settings.setValue("Récents &Fichier", recentFiles);
-
             // Ouvrir nouvel onglet avec le fichier voulu
             QTextEdit *textEdit = new QTextEdit(ui->tabWidget);
             textEdit->setPlainText(in.readAll());
-
-            // connecter le curseur au slot updatecursorposition
-            connect(textEdit, &QTextEdit::cursorPositionChanged, this, &MainWindow::updateCursorPosition);
-
-
             // Ajoutez l'onglet avec le texte du fichier
             int tabIndex = ui->tabWidget->addTab(textEdit, QFileInfo(filePath).fileName());
-
             // Initialisez la propriété "TabIndex" avec l'index de l'onglet
             textEdit->setProperty("TabIndex", tabIndex);
-
+            // Fermer le fichier d''origine
             file.close();
 
             // Connectez le signal textChanged au slot asterisk
             connect(textEdit, &QTextEdit::textChanged, this, &MainWindow::asterisk);
-
-            connect(ui->action_Rechercher, &QAction::triggered, this, &MainWindow::openSearch);
+            // connecter le curseur au slot updatecursorposition
+            connect(textEdit, &QTextEdit::cursorPositionChanged, this, &MainWindow::updateCursorPosition);
+            // connecter le curseur au slot Find & Replace
+            connect(ui->action_Chercher, &QAction::triggered, this, &MainWindow::openSearch);
             connect(ui->action_Remplacer, &QAction::triggered, this, &MainWindow::openReplace);
-        }
+        }ui->tabWidget->show();
     }
 }
+
 void MainWindow::save_file(){
 QString filePath = QFileDialog::getSaveFileName(this, "Enregistrer sous", QString(), "Fichiers texte (*.txt);;Tous les fichiers (*)");
     if (!filePath.isEmpty()) {
@@ -128,7 +108,6 @@ QString filePath = QFileDialog::getSaveFileName(this, "Enregistrer sous", QStrin
 }
 }
 }
-
 void MainWindow::asterisk(){
     QTextEdit *textEdit = qobject_cast<QTextEdit*>(sender()); // Obtenez le QTextEdit émetteur du signal
         if (textEdit) {
@@ -147,8 +126,8 @@ void MainWindow::updateCursorPosition() {
     QTextEdit *textEdit = qobject_cast<QTextEdit*>(sender());
     if (textEdit) {
         QTextCursor cursor = textEdit->textCursor();
-        int line = cursor.blockNumber() + 1; // Les lignes sont généralement numérotées à partir de 1
-        int column = cursor.columnNumber() + 1; // Les colonnes sont généralement numérotées à partir de 1
+        int line = cursor.blockNumber() + 1; // Pour numérotées à partir de 1
+        int column = cursor.columnNumber() + 1; // Pour numérotées à partir de 1
 
         // Mettez à jour le texte de la barre d'état
         statusBar()->showMessage(QString("Ligne : %1, Colonne : %2").arg(line).arg(column));
@@ -156,29 +135,98 @@ void MainWindow::updateCursorPosition() {
 }
 
 void MainWindow::openSearch(){
-    QTextEdit *currentTextEdit = qobject_cast<QTextEdit*>(ui->tabWidget->currentWidget());
-        if (currentTextEdit) {
-            Searchbox *research_ = new Searchbox(currentTextEdit, this);
-            research_->exec(); // Ouvrir la fenêtre de recherche
-            delete(research_);   // Libérer la mémoire lorsque la fenêtre de recherche est fermée
+    ui->tabWidget1->setTabVisible(1,false);
+    ui->tabWidget1->setTabVisible(0,true);
+    ui->tabWidget1->show();
 }
-}
-
 
 void MainWindow::openReplace(){
+    ui->tabWidget1->setTabVisible(1,true);
+    ui->tabWidget1->setTabVisible(0,false);
+    ui->tabWidget1->show();
+}
+
+void MainWindow::hideTab(){
+    ui->tabWidget1->hide();
+}
+
+void MainWindow::search_in_text() {
+    QString searchText = ui->lineEdit->text();
     QTextEdit *currentTextEdit = qobject_cast<QTextEdit*>(ui->tabWidget->currentWidget());
-        if (currentTextEdit) {
-            Replacebox *replace_ = new Replacebox(currentTextEdit, this);
-            replace_->exec(); // Ouvrir la fenêtre
-            delete(replace_);   // Libérer la mémoire lorsque la fenêtre est fermée
-}
-}
 
+    if (!searchText.isEmpty()) {
+        QTextCursor cursor(currentTextEdit->document());
+        bool trouve = false;
 
-void MainWindow::openRecentFile() {
-    QAction *action = qobject_cast<QAction *>(sender());
-    if (action) {
-        QString filePath = action->text();
-        //open_file(filePath);
+        while (!cursor.isNull() && !cursor.atEnd()) {
+            cursor = currentTextEdit->document()->find(searchText, cursor);
+
+            if (!cursor.isNull()) {
+                cursor.movePosition(QTextCursor::WordRight, QTextCursor::KeepAnchor);
+                currentTextEdit->setTextCursor(cursor);
+                currentTextEdit->setFocus();
+                trouve = true;
+                lastFoundCursor.setPosition(cursor.selectionEnd());
+                break;
+            }
+        }
+        if (!trouve) {
+            QMessageBox::information(this, "Recherche", "Aucune correspondance trouvée.");
+        }
     }
 }
+
+void MainWindow::next_in_text() {
+    QString searchText = ui->lineEdit->text();
+        QTextEdit *currentTextEdit = qobject_cast<QTextEdit*>(ui->tabWidget->currentWidget());
+
+        if (!searchText.isEmpty()) {
+            QTextCursor cursor(currentTextEdit->document());
+
+
+            cursor.setPosition(lastFoundCursor.position());
+
+            bool found = false;
+
+            while (!cursor.isNull() && !cursor.atEnd()) {
+                cursor = currentTextEdit->document()->find(searchText, cursor);
+
+                if (!cursor.isNull()) {
+                    cursor.movePosition(QTextCursor::WordRight, QTextCursor::KeepAnchor);
+                    currentTextEdit->setTextCursor(cursor);
+                    currentTextEdit->setFocus();
+                    lastFoundCursor = cursor;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                QMessageBox::information(this, "Recherche", "Fin du document,plus de correspondance trouvée.");
+            }
+        }
+    }
+
+void MainWindow::replace_in_text() {
+    QString searchText = ui->lineEdit_rempla->text();
+        QString replaceText = ui->lineEdit_Par->text();
+        QTextEdit *currentTextEdit = qobject_cast<QTextEdit*>(ui->tabWidget->currentWidget());
+
+        if (!searchText.isEmpty() && currentTextEdit) {
+            QTextCursor cursor(currentTextEdit->document());
+
+            bool replacementMade = false;
+
+            while (!cursor.isNull() && !cursor.atEnd()) {
+                cursor = currentTextEdit->document()->find(searchText, cursor);
+
+                if (!cursor.isNull()) {
+                    cursor.removeSelectedText();
+                    cursor.insertText(replaceText);
+                    replacementMade = true;
+                }
+            }
+            if (!replacementMade) {
+                QMessageBox::information(this, "Recherche", "Aucune correspondance trouvée.");
+            }
+        }
+    }

@@ -10,14 +10,10 @@ CONFIG += c++17
 
 SOURCES += \
     main.cpp \
-    mainwindow.cpp \
-    replacebox.cpp \
-    searchbox.cpp
+    mainwindow.cpp
 
 HEADERS += \
-    mainwindow.h \
-    replacebox.h \
-    searchbox.h
+    mainwindow.h
 
 FORMS += \
     mainwindow.ui

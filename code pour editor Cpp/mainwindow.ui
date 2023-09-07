@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>543</width>
-    <height>401</height>
+    <width>628</width>
+    <height>297</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
@@ -24,18 +24,89 @@
        <attribute name="title">
         <string>Tab 1</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <widget class="QTextEdit" name="textEdit">
-          <property name="html">
-           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Cantarell'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Insérer votre texte ici&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <widget class="QTextEdit" name="textEdit"/>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tabWidgetPage1">
+       <attribute name="title">
+        <string/>
+       </attribute>
+       <widget class="QWidget" name="layoutWidget">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>40</y>
+          <width>131</width>
+          <height>116</height>
+         </rect>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Rechercher le mot :</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_Rech">
+           <property name="text">
+            <string>Rechercher</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_Suiv">
+           <property name="text">
+            <string>Suivant</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="tabWidgetPage2">
+       <attribute name="title">
+        <string/>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Remplacer :</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit_rempla"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Par : </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit_Par"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_Remplacer">
+          <property name="text">
+           <string>Remplacer</string>
           </property>
          </widget>
         </item>
@@ -50,7 +121,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>543</width>
+     <width>628</width>
      <height>23</height>
     </rect>
    </property>
@@ -60,12 +131,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </property>
     <addaction name="action_Ouvrir"/>
     <addaction name="action_Sauver"/>
+    <addaction name="action_R_cent"/>
    </widget>
    <widget class="QMenu" name="menu_Recherche">
     <property name="title">
      <string>&amp;Recherche</string>
     </property>
-    <addaction name="action_Rechercher"/>
+    <addaction name="action_Chercher"/>
     <addaction name="action_Remplacer"/>
    </widget>
    <addaction name="menu_Fichier"/>
@@ -82,29 +154,19 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <string>&amp;Sauver</string>
    </property>
   </action>
-  <action name="actionRechercher">
+  <action name="action_R_cent">
    <property name="text">
-    <string>&amp;Rechercher</string>
+    <string>&amp;Récent</string>
    </property>
   </action>
-  <action name="actionRemplacer">
+  <action name="action_Chercher">
    <property name="text">
-    <string>&amp;Remplacer</string>
-   </property>
-  </action>
-  <action name="action_Rechercher">
-   <property name="text">
-    <string>&amp;Rechercher</string>
+    <string>&amp;Chercher </string>
    </property>
   </action>
   <action name="action_Remplacer">
    <property name="text">
     <string>&amp;Remplacer</string>
-   </property>
-  </action>
-  <action name="action_R_cents">
-   <property name="text">
-    <string>&amp;Récents</string>
    </property>
   </action>
  </widget>
