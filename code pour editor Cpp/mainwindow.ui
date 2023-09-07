@@ -129,9 +129,15 @@
     <property name="title">
      <string>&amp;Fichier</string>
     </property>
+    <widget class="QMenu" name="menu_R_cent">
+     <property name="title">
+      <string>&amp;Récent</string>
+     </property>
+     <addaction name="action_newrecent"/>
+    </widget>
     <addaction name="action_Ouvrir"/>
     <addaction name="action_Sauver"/>
-    <addaction name="action_R_cent"/>
+    <addaction name="menu_R_cent"/>
    </widget>
    <widget class="QMenu" name="menu_Recherche">
     <property name="title">
@@ -154,11 +160,6 @@
     <string>&amp;Sauver</string>
    </property>
   </action>
-  <action name="action_R_cent">
-   <property name="text">
-    <string>&amp;Récent</string>
-   </property>
-  </action>
   <action name="action_Chercher">
    <property name="text">
     <string>&amp;Chercher </string>
@@ -167,6 +168,11 @@
   <action name="action_Remplacer">
    <property name="text">
     <string>&amp;Remplacer</string>
+   </property>
+  </action>
+  <action name="action_newrecent">
+   <property name="text">
+    <string>&amp;newrecent</string>
    </property>
   </action>
  </widget>

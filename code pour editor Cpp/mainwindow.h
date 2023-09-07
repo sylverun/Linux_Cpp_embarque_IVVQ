@@ -17,7 +17,6 @@ public:
     ~MainWindow();
 
 private slots:
-    void open_file();
     void save_file();
     void asterisk();
     void updateCursorPosition();
@@ -28,8 +27,12 @@ private slots:
     void search_in_text();
     void next_in_text();
     void replace_in_text();
+    void updateRecentMenu();
+    void open_file();
+    void openRecentFile();
 private:
     Ui::MainWindow *ui;
     QTextCursor lastFoundCursor;
+    QStringList recentFiles;
 };
 #endif // MAINWINDOW_H

@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->tabWidget1->hide();
     ui->tabWidget->hide();
     ui->tabWidget->removeTab(0);
+    ui->action_newrecent->setVisible(false);
 
     // Associez des raccourcis clavier aux actions
     ui->action_Ouvrir->setShortcut(QKeySequence::Open);
@@ -88,6 +89,18 @@ void MainWindow::open_file(){
             // connecter le curseur au slot Find & Replace
             connect(ui->action_Chercher, &QAction::triggered, this, &MainWindow::openSearch);
             connect(ui->action_Remplacer, &QAction::triggered, this, &MainWindow::openReplace);
+
+            // Ajouter le chemin du fichier ouvert à la liste des fichiers récents
+            recentFiles.prepend(filePath);
+
+            // Limiter la liste à 10 fichiers récents
+            if (recentFiles.size() > 10) {
+                recentFiles.removeLast();
+            }
+            // Mettre à jour le sous-menu "Recents"
+            this->updateRecentMenu();
+
+
         }ui->tabWidget->show();
     }
 }
@@ -230,3 +243,61 @@ void MainWindow::replace_in_text() {
             }
         }
     }
+
+
+void MainWindow::updateRecentMenu() {
+    QMenu* recentsMenu = ui->menu_R_cent;
+    if (recentsMenu) {
+        // Effacer tous les éléments actuels du sous-menu "Recents"
+        recentsMenu->clear();
+
+        // Ajouter les fichiers récents en tant qu'actions dans le sous-menu
+        for (int i = 0; i < recentFiles.size(); ++i) {
+            QAction* recentFileAction = new QAction(recentFiles.at(i), this);
+            connect(recentFileAction, &QAction::triggered, this, &MainWindow::openRecentFile);
+            recentsMenu->addAction(recentFileAction);
+        }
+    }
+}
+
+void MainWindow::openRecentFile() {
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action) {
+        QString filePath = action->text();
+        if (!filePath.isEmpty()) {
+            QFile file(filePath);
+            if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                QTextStream in(&file);
+                // Ouvrir nouvel onglet avec le fichier voulu
+                QTextEdit *textEdit = new QTextEdit(ui->tabWidget);
+                textEdit->setPlainText(in.readAll());
+                // Ajoutez l'onglet avec le texte du fichier
+                int tabIndex = ui->tabWidget->addTab(textEdit, QFileInfo(filePath).fileName());
+                // Initialisez la propriété "TabIndex" avec l'index de l'onglet
+                textEdit->setProperty("TabIndex", tabIndex);
+                // Fermer le fichier d''origine
+                file.close();
+
+                // Connectez le signal textChanged au slot asterisk
+                connect(textEdit, &QTextEdit::textChanged, this, &MainWindow::asterisk);
+                // connecter le curseur au slot updatecursorposition
+                connect(textEdit, &QTextEdit::cursorPositionChanged, this, &MainWindow::updateCursorPosition);
+                // connecter le curseur au slot Find & Replace
+                connect(ui->action_Chercher, &QAction::triggered, this, &MainWindow::openSearch);
+                connect(ui->action_Remplacer, &QAction::triggered, this, &MainWindow::openReplace);
+
+                // Ajouter le chemin du fichier ouvert à la liste des fichiers récents
+                recentFiles.prepend(filePath);
+
+                // Limiter la liste à 10 fichiers récents
+                if (recentFiles.size() > 10) {
+                    recentFiles.removeLast();
+                }
+                // Mettre à jour le sous-menu "Recents"
+                this->updateRecentMenu();
+
+
+            }ui->tabWidget->show();
+        }
+    }
+ }
