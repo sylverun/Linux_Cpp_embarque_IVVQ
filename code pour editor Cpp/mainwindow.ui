@@ -135,6 +135,7 @@
      </property>
      <addaction name="action_newrecent"/>
     </widget>
+    <addaction name="action_New"/>
     <addaction name="action_Ouvrir"/>
     <addaction name="action_Sauver"/>
     <addaction name="menu_R_cent"/>
@@ -173,6 +174,11 @@
   <action name="action_newrecent">
    <property name="text">
     <string>&amp;newrecent</string>
+   </property>
+  </action>
+  <action name="action_New">
+   <property name="text">
+    <string>&amp;Nouveau</string>
    </property>
   </action>
  </widget>

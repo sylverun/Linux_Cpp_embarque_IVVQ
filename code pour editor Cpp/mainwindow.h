@@ -30,6 +30,7 @@ private slots:
     void updateRecentMenu();
     void open_file();
     void openRecentFile();
+    void new_file();
 private:
     Ui::MainWindow *ui;
     QTextCursor lastFoundCursor;

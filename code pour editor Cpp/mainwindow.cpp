@@ -19,12 +19,14 @@ MainWindow::MainWindow(QWidget *parent)
     ui->action_newrecent->setVisible(false);
 
     // Associez des raccourcis clavier aux actions
+    ui->action_New->setShortcut(QKeySequence::New);
     ui->action_Ouvrir->setShortcut(QKeySequence::Open);
     ui->action_Sauver->setShortcut(QKeySequence::Save);
     ui->action_Chercher->setShortcut(QKeySequence::Find);
     ui->action_Remplacer->setShortcut(QKeySequence::Print);
 
     //Action sur ouvrir et sauver
+    connect(ui->action_New,SIGNAL(triggered()),this,SLOT(new_file()));
     connect(ui->action_Ouvrir,SIGNAL(triggered()),this,SLOT(open_file()));
     connect(ui->action_Sauver,SIGNAL(triggered()),this,SLOT(save_file()));
 
@@ -66,6 +68,28 @@ void MainWindow::closeTab(int index){
     ui->tabWidget->removeTab(index);
 }
 
+void MainWindow::new_file(){
+            // Ouvrir un nouvel onglet
+            QTextEdit *textEdit = new QTextEdit(ui->tabWidget);
+            // Ajoutez l'onglet avec le texte du fichier
+            QString new_doc= "Nouveau Document";
+            int tabIndex = ui->tabWidget->addTab(textEdit, new_doc);
+            // Initialisez la propriété "TabIndex" avec l'index de l'onglet
+            textEdit->setProperty("TabIndex", tabIndex);
+
+
+            // Connectez le signal textChanged au slot asterisk
+            connect(textEdit, &QTextEdit::textChanged, this, &MainWindow::asterisk);
+            // connecter le curseur au slot updatecursorposition
+            connect(textEdit, &QTextEdit::cursorPositionChanged, this, &MainWindow::updateCursorPosition);
+            // connecter le curseur au slot Find & Replace
+            connect(ui->action_Chercher, &QAction::triggered, this, &MainWindow::openSearch);
+            connect(ui->action_Remplacer, &QAction::triggered, this, &MainWindow::openReplace);
+
+            ui->tabWidget->show();
+}
+
+
 void MainWindow::open_file(){
     QString filePath = QFileDialog::getOpenFileName(this, "Ouvrir un fichier", QString(),"Fichiers texte (*.txt);;Tous les fichiers (*)");
     if (!filePath.isEmpty()) {
@@ -74,11 +98,15 @@ void MainWindow::open_file(){
             QTextStream in(&file);
             // Ouvrir nouvel onglet avec le fichier voulu
             QTextEdit *textEdit = new QTextEdit(ui->tabWidget);
-            textEdit->setPlainText(in.readAll());
+            // Initier le texte original pour savoir si il y a modification
+            QString originalText = in.readAll();
+            textEdit->setPlainText(originalText);
             // Ajoutez l'onglet avec le texte du fichier
             int tabIndex = ui->tabWidget->addTab(textEdit, QFileInfo(filePath).fileName());
             // Initialisez la propriété "TabIndex" avec l'index de l'onglet
             textEdit->setProperty("TabIndex", tabIndex);
+            // Initialisez la propriété "OriginalText" avec le texte original
+            textEdit->setProperty("OriginalText", originalText);
             // Fermer le fichier d''origine
             file.close();
 
@@ -121,18 +149,29 @@ QString filePath = QFileDialog::getSaveFileName(this, "Enregistrer sous", QStrin
 }
 }
 }
-void MainWindow::asterisk(){
-    QTextEdit *textEdit = qobject_cast<QTextEdit*>(sender()); // Obtenez le QTextEdit émetteur du signal
-        if (textEdit) {
-            int tabIndex = textEdit->property("TabIndex").toInt(); // Obtenez le numéro de l'onglet
-            QString tabText = ui->tabWidget->tabText(tabIndex); // Obtenez le texte actuel de l'onglet
 
-            if (!tabText.endsWith('*')) { // Vérifiez si l'astérisque n'est pas déjà présent
-                tabText += '*'; // Ajoutez un astérisque
-                ui->tabWidget->setTabText(tabIndex, tabText); // Mettez à jour le texte de l'onglet
+void MainWindow::asterisk() {
+    QTextEdit *textEdit = qobject_cast<QTextEdit*>(sender()); // Obtenez le QTextEdit émetteur du signal
+    if (textEdit) {
+        int tabIndex = textEdit->property("TabIndex").toInt(); // Obtenez le numéro de l'onglet
+        QString tabText = ui->tabWidget->tabText(tabIndex); // Obtenez le texte actuel de l'onglet
+        QString originalText = textEdit->property("OriginalText").toString(); // Récupérez le texte d'origine
+
+        if (textEdit->toPlainText() == originalText) {
+            // Retirez l'astérisque seulement si le texte actuel est le même que le texte d'origine
+            if (tabText.endsWith('*')) {
+                tabText.chop(1); // Supprimez l'astérisque à la fin
+                ui->tabWidget->setTabText(tabIndex, tabText);
+            }
+        } else {
+            // Ajoutez un astérisque si le texte actuel est différent du texte d'origine
+            if (!tabText.endsWith('*')) {
+                tabText += '*';
+                ui->tabWidget->setTabText(tabIndex, tabText);
             }
         }
     }
+}
 
 
 void MainWindow::updateCursorPosition() {
@@ -270,11 +309,15 @@ void MainWindow::openRecentFile() {
                 QTextStream in(&file);
                 // Ouvrir nouvel onglet avec le fichier voulu
                 QTextEdit *textEdit = new QTextEdit(ui->tabWidget);
-                textEdit->setPlainText(in.readAll());
+                // Initier le texte original pour savoir si il y a modification
+                QString originalText = in.readAll();
+                textEdit->setPlainText(originalText);
                 // Ajoutez l'onglet avec le texte du fichier
                 int tabIndex = ui->tabWidget->addTab(textEdit, QFileInfo(filePath).fileName());
                 // Initialisez la propriété "TabIndex" avec l'index de l'onglet
                 textEdit->setProperty("TabIndex", tabIndex);
+                // Initialisez la propriété "OriginalText" avec le texte original
+                textEdit->setProperty("OriginalText", originalText);
                 // Fermer le fichier d''origine
                 file.close();
 
