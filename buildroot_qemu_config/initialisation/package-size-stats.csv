@@ -1,0 +1,12 @@
+Package name,Package size,Package size in system (%)
+skeleton-init-common,16083,0.3
+unknown,143,0.0
+skeleton-init-sysv,334,0.0
+toolchain,230,0.0
+busybox,830938,15.3
+ifupdown-scripts,2040,0.0
+urandom-scripts,1243,0.0
+initscripts,831,0.0
+glibc,2164880,39.8
+host-gcc-final,2055458,37.8
+linux,366024,6.7
