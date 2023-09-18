@@ -5,17 +5,18 @@
 #include <curl/curl.h>
 #include <nlohmann/json.hpp>
 #include <fstream>
-//#include "EasyBMP/EasyBMP.h"
+#include <CImg.h>
 
 
 using namespace std;
+using namespace cimg_library;
 
 
 string set_URL_coinbase(const string& symbole){
     return "https://api.coinbase.com/v2/exchange-rates?currency="+ symbole;
 }
 
-// Fonction de rappel pour gérer la réponse HTTP
+    // Fonction de rappel pour gérer la réponse HTTP
 size_t WriteCallback(void* contents, size_t size, size_t nmemb, string* output) {
     size_t total_size = size * nmemb;
     output->append(static_cast<char*>(contents), total_size);
@@ -35,6 +36,7 @@ double obtain_price(const string& URL){
     // Configurer la requête HTTP GET pour to_convert
     curl_easy_setopt(curl, CURLOPT_URL, URL.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 
     // Stocker la réponse HTTP dans cette chaîne de caractères
     string response_data;
@@ -67,12 +69,9 @@ double obtain_price(const string& URL){
     return price;
 }
 
+int main(){
 
-
-int main()
-{
-
-// Faire une map avec les symboles reconnus par l'api correspondant aux crypto et devises voulues.
+    // Faire une map avec les symboles reconnus par l'api correspondant aux crypto et devises voulues.
     map<string, string> CryptoAndCurrencies;
     CryptoAndCurrencies["Bitcoin"] = "BTC";
     CryptoAndCurrencies["Ethereum"] = "ETH";
@@ -84,7 +83,7 @@ int main()
     CryptoAndCurrencies["Euro"] = "EUR";
     CryptoAndCurrencies["Yen japonais"] = "JPY";
 
-// Faire une requete pour chaque elements de Crypto_list pour obtenir son prix en dollar et stocker les résultat dans une map
+    // Faire une requete pour chaque elements de Crypto_list pour obtenir son prix en dollar et stocker les résultat dans une map
     map<string, double> Crypto_prices_USD;
     for (const auto &crypto : CryptoAndCurrencies){
         string cryptoSymbol = crypto.second;
@@ -93,8 +92,7 @@ int main()
         Crypto_prices_USD[cryptoSymbol]= price_crypto;
     }
 
-
-    // Créer un tableau de conversion pour toutes les cryptomonnaies et devises
+    // Créer un tableau de conversion pour toutes les cryptomonnaies et devises (utilisé  pour généré  le json)
     map<string, map<string, double>> ConversionTable;
 
     for (const auto &cryptoFrom : CryptoAndCurrencies) {
@@ -114,12 +112,12 @@ int main()
         ConversionTable[crypfromSymbol] = conversions;
     }
 
-    // Pour le suivi, enregistrement de la date et de l'heure de la requete
-            time_t currentTime = time(nullptr);
-            tm *localTime = localtime(&currentTime);
-            char dateTimeString[100];
-            strftime(dateTimeString, sizeof(dateTimeString), "%Y-%m-%d_%H-%M-%S", localTime);
 
+    // Pour le suivi, enregistrement de la date et de l'heure de la requete
+        time_t currentTime = time(nullptr);
+        tm *localTime = localtime(&currentTime);
+        char dateTimeString[100];
+        strftime(dateTimeString, sizeof(dateTimeString), "%Y-%m-%d_%H-%M-%S", localTime);
 
 
     // Créer un objet JSON à partir du tableau de conversion et ajouter la date et l'heure
@@ -136,7 +134,47 @@ int main()
         jsonFile << ConversionJson;
         jsonFile.close();
 
-    //  Creation d'un tableau au format image
+
+        // Créez une liste de symboles de crypto triés par ordre alphabétique
+        vector<string> symbols;
+        for (const auto& pair : CryptoAndCurrencies) {
+            symbols.push_back(pair.second);
+        }
+        sort(symbols.begin(), symbols.end());
+
+
+        // Obtenez la taille de la map (nombre de symboles)
+        int mapSize = symbols.size();
+
+        // Créez une image CImg pour le tableau
+        CImg<unsigned char> image((mapSize + 1) * 100, (mapSize + 1) * 30, 1, 3, 255);
+
+        // Remplissez la première ligne avec les symboles de crypto triés
+        for (int i = 0; i < mapSize; i++) {
+            image.draw_text((i + 1) * 100, 0, symbols[i].c_str(), "black");
+        }
+
+        // Remplissez la première colonne avec les symboles de crypto triés
+        for (int i = 0; i < mapSize; i++) {
+            string Symb = "1 " + symbols[i] + " =";
+            image.draw_text(0, (i + 1) * 30, Symb.c_str(), "black");
+        }
+
+        // Remplir l'image avec les données de ConversionTable
+        for (int i = 0; i < mapSize; i++) {
+            for (int j = 0; j < mapSize; j++) {
+                char valueStr[15];
+                snprintf(valueStr, sizeof(valueStr), "%e", ConversionTable[symbols[i]][symbols[j]]);
+                image.draw_text((j + 1) * 100, (i + 1) * 30, valueStr, "black");
+            }
+        }
+
+        // Sauvegarder l'image en PNG ou JPEG
+        image.save("conversion_table.png");
+        //image.save("conversion_table.jpg");
+
+        cout << "Tableau de conversion enregistré en tant qu'image." << endl;
+
 
     return 0;
 }
